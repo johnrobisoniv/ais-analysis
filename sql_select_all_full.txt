@@ -1,0 +1,13 @@
+SELECT grouped.mmsi, grouped.vessel_name AS name,
+	v.vessel_type AS type, v.vessel_type_code AS code, v.length, v.flag_country AS flag,
+	grouped.agg_geog
+FROM (
+	SELECT mmsi, vessel_name, ST_Collect(inside.position::geometry ORDER BY ts_pos_utc ASC)::geography AS agg_geog
+	FROM (
+		SELECT mmsi, vessel_name, position, ts_pos_utc
+		FROM ping
+	) AS inside
+	GROUP BY mmsi, vessel_name
+) AS grouped
+LEFT OUTER JOIN vessel v ON (v.mmsi=grouped.mmsi AND v.vessel_name=grouped.vessel_name)
+ORDER BY flag, type, mmsi, name

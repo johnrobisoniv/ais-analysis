@@ -1,0 +1,6 @@
+SELECT	vp.partition_code AS sample,
+	count(CASE WHEN (in_atalanta_south OR in_atalanta_north) THEN 1 ELSE NULL END) AS atalanta_arabian,
+FROM vessel_profile vp
+WHERE	vp.ping_count > 1
+GROUP BY vp.partition_code
+ORDER BY vp.partition_code ASC

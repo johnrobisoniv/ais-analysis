@@ -1,0 +1,12 @@
+DELETE FROM ping
+WHERE
+length > 458		OR
+@ longitude > 180	OR
+@ latitude > 90		OR
+sog < 0			OR
+sog > 35 		OR
+cog < 0 		OR
+cog > 360		OR
+heading < 0 		OR
+heading > 360
+;

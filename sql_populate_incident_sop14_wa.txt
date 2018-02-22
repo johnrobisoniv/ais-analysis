@@ -1,0 +1,125 @@
+SET SESSION timezone = 'UTC';
+
+INSERT INTO incident (
+	region,
+	date_time,
+	vessel_name,
+	vessel_imo,
+	vessel_type,
+	flag_country,
+	non_ship,
+	non_piracy,
+	non_counted,
+	latitude,
+	longitude,
+	position,
+	position_ts,
+	location_type,
+	movement_type,
+	activity_boarding,
+	boarded,
+	pirates_aboard,
+	activity_theft_stores,
+	activity_theft_crew,
+	activity_theft_cargo,
+	activity_kidnapping,
+	activity_hijacking,
+	mothershipped,
+	political
+	)
+SELECT 	'WA',
+	to_timestamp(date, 'MM/DD/YY'),
+	CASE	WHEN ship_name ILIKE '%N/A%' THEN 'UNKNOWN' 
+		WHEN ship_name ILIKE 'NA%' THEN 'UNKNOWN'
+		WHEN ship_name ILIKE 'Unknown%' THEN 'UNKNOWN'
+		WHEN ship_name ILIKE 'Unkown%' THEN 'UNKNOWN'
+		WHEN ship_name ILIKE 'Uknown%' THEN 'UNKNOWN'
+		WHEN ship_name ILIKE 'Multiple Ships%' THEN 'MULTIPLE'
+		WHEN ship_name ILIKE 'Multiple Boats%' THEN 'MULTIPLE'
+		WHEN ship_name ILIKE 'Oil Platform%' THEN 'OIL PLATFORM'
+		ELSE regexp_replace(ship_name, '\s+$', '')
+		END,
+	-1,
+	ship_type,
+	flag_state,
+	'false',
+	'false',
+	Not_Counted,
+	calc_decimal_degrees(Lat_Decimal, Lat_Degrees, Lat_Minutes, Lat_Minutes_Dec, Lat_NS),
+	calc_decimal_degrees(Long_Decimal, Long_Degrees, Long_Minutes, Long_Minutes_Dec, Long_EW),
+	CASE	WHEN Long_Decimal != '' AND Long_Decimal ~ E'^[+-]?[0-9]+(\.[0-9]+)?$' AND Lat_Decimal != '' AND Lat_Decimal ~ E'^[+-]?[0-9]+(\.[0-9]+)?$' THEN ST_SetSRID(ST_MakePoint(Long_Decimal::FLOAT, Lat_decimal::FLOAT), 4326)
+		WHEN ((Long_EW='E' OR Long_EW='W') AND (Lat_NS='N' OR Lat_NS='S')) AND (Lat_Degrees = '' OR abs(Lat_Degrees::SMALLINT) <= 90) AND (Lat_Minutes = '' OR abs(Lat_Minutes::SMALLINT) <= 60) AND (Long_Degrees = '' OR abs(Long_Degrees::SMALLINT) <= 180) AND (Long_Minutes = '' OR abs(Long_Minutes::SMALLINT) <= 60) THEN 
+		ST_SetSRID(ST_MakePoint(
+			calc_decimal_degrees(Long_Decimal, Long_Degrees, Long_Minutes, Long_Minutes_Dec, Long_EW),
+			calc_decimal_degrees(Lat_Decimal, Lat_Degrees, Lat_Minutes, Lat_Minutes_Dec, Lat_NS)),
+			4326)
+		ELSE NULL
+		END,
+	CASE	WHEN Long_Decimal != '' AND Long_Decimal ~ E'^[+-]?[0-9]+(\.[0-9]+)?$' AND Lat_Decimal != '' AND Lat_Decimal ~ E'^[+-]?[0-9]+(\.[0-9]+)?$' THEN ST_SetSRID(ST_MakePoint(Long_Decimal::FLOAT, Lat_decimal::FLOAT, extract(epoch from to_timestamp(date, 'MM/DD/YY'))), 4326)
+		WHEN ((Long_EW='E' OR Long_EW='W') AND (Lat_NS='N' OR Lat_NS='S')) AND (Lat_Degrees = '' OR abs(Lat_Degrees::SMALLINT) <= 90) AND (Lat_Minutes = '' OR abs(Lat_Minutes::SMALLINT) <= 60) AND (Long_Degrees = '' OR abs(Long_Degrees::SMALLINT) <= 180) AND (Long_Minutes = '' OR abs(Long_Minutes::SMALLINT) <= 60) THEN 
+		ST_SetSRID(ST_MakePointM(
+			calc_decimal_degrees(Long_Decimal, Long_Degrees, Long_Minutes, Long_Minutes_Dec, Long_EW),
+			calc_decimal_degrees(Lat_Decimal, Lat_Degrees, Lat_Minutes, Lat_Minutes_Dec, Lat_NS),
+			extract(epoch from to_timestamp(date, 'MM/DD/YY'))),
+			4326)
+		ELSE NULL
+		END,
+	location_type,	
+	movement_type,
+	CASE	WHEN Activity_Type ILIKE '%Successful Boarding%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Failed Boarding%' THEN 'Attempted'
+		WHEN Activity_Type ILIKE '%Soft Approach%' THEN 'Soft Approach'
+		WHEN Activity_Type ILIKE '%Suspicious Activity%' THEN 'Suspicious Activity'
+		ELSE 'None'
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Failed Boarding%' THEN false
+		WHEN Activity_Type ILIKE '%Successful Boarding%' THEN true
+		WHEN Activity_Type ILIKE '%Failed Robbery%' THEN true
+		WHEN Activity_Type ILIKE '%Robbery%' THEN true
+		WHEN Activity_Type ILIKE '%Failed Bunkering%' THEN true
+		WHEN Activity_Type ILIKE '%Bunkering%' THEN true
+		WHEN Activity_Type ILIKE '%Failed Hostaging%' THEN true
+		WHEN Activity_Type ILIKE '%Failed Kidnapping%' THEN true
+		WHEN Activity_Type ILIKE '%Hostage/Kidnapping%' THEN true
+		WHEN Activity_Type ILIKE '%Hostage/All Crew%' THEN true
+		WHEN Activity_Type ILIKE '%Hostages Detained%' THEN true
+		WHEN Activity_Type ILIKE '%Vessel Hijack/Crew Release%' THEN true
+		WHEN Activity_Type ILIKE '%Mothershipped%' THEN true
+		WHEN Activity_Type ILIKE '%Political Violence%' THEN true
+		ELSE false
+		END,
+	CASE	WHEN POB ILIKE '%<%' OR POB ILIKE '%>%' THEN regexp_replace(POB, '[^0-9]', '')::SMALLINT
+		WHEN POB ILIKE '%-%' THEN left(POB, position('-' in POB)-1)::SMALLINT
+		ELSE POB::SMALLINT
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Failed Robbery%' THEN 'Attempted'
+		WHEN Activity_Type ILIKE '%Robbery%' THEN 'Successful'
+		ELSE 'None'
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Failed Robbery%' THEN 'Attempted'
+		WHEN Activity_Type ILIKE '%Robbery%' THEN 'Successful'
+		ELSE 'None'
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Failed Bunkering%' THEN 'Attempted'
+		WHEN Activity_Type ILIKE '%Bunkering%' THEN 'Successful'
+		ELSE 'None'
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Hostage/Kidnapping%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Hostage/All Crew%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Hostages Detained%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Failed Kidnapping%' THEN 'Attempted'
+		WHEN Activity_Type ILIKE '%Failed Hostaging%' THEN 'Attempted'
+		ELSE 'None'
+		END,
+	CASE	WHEN Activity_Type ILIKE '%Vessel Hijack/Crew Release%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Vessel Hijack%' THEN 'Successful'
+		WHEN Activity_Type ILIKE '%Mothershipped%' THEN 'Successful'
+		ELSE 'None'
+		END, 
+	Activity_Type ILIKE '%Mothershipped%',
+	Activity_Type ILIKE '%Political Violence%'
+FROM incident_raw_sop14
+;	
+	
+
+SET SESSION timezone = 'MST';

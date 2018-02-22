@@ -1,0 +1,28 @@
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.vessel_name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name
+			FROM	ping
+			LEFT OUTER JOIN zone z ON z.name='eez_somalia_old'
+			WHERE extract(month from ts_pos_utc) = 3
+			AND ST_Intersects(position, z.geog)
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.vessel_name)
+		WHERE extract(month from ping.ts_pos_utc) = 3
+		) AS outsub
+	GROUP BY outsub.mmsi, outsub.vessel_name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.vessel_name)
+ORDER BY vessel.flag_country, vessel.vessel_type
+;
+
+
+pgsql2shp -f "C:\custom\pg_exports\2016_eez_somali_aggregated.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_2016 "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM ( SELECT outsub.mmsi, outsub.vessel_name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM ( SELECT sub.*, ping.position, ping.ts_pos_utc, ping.custom_id FROM ( SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name FROM ping LEFT OUTER JOIN zone z ON z.name='eez_somalia_old' WHERE extract(month from ts_pos_utc) = 3 AND ST_Intersects(position, z.geog) ) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.vessel_name) WHERE extract(month from ping.ts_pos_utc) = 3 ) AS outsub GROUP BY outsub.mmsi, outsub.vessel_name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.vessel_name) ORDER BY vessel.flag_country, vessel.vessel_type;"

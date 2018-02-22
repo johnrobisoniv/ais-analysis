@@ -1,0 +1,88 @@
+INCLUSIVE
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_saa_aggpings.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT mmsi, agg_geog FROM vessel_profile WHERE in_npa_saa"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_saa_lines.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT mmsi, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile WHERE in_npa_saa"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_sts_aggpings.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT mmsi, agg_geog FROM vessel_profile WHERE in_npa_sts"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_sts_lines.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT mmsi, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile WHERE in_npa_sts"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_wa_aggpings.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT mmsi, agg_geog FROM vessel_profile WHERE in_region_wa"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_wa_lines.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT mmsi, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile WHERE in_region_wa"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_ea_aggpings.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT mmsi, agg_geog FROM vessel_profile WHERE in_region_ea"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_ea_lines.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT mmsi, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile WHERE in_region_ea"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_sea_aggpings.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT mmsi, agg_geog FROM vessel_profile WHERE in_region_sea"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_sea_lines.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT mmsi, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile WHERE in_region_sea"
+
+CARGO & CONTAINER, 120m+
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_saa_aggpings_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, vessel_profile.agg_geog FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_npa_saa AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_saa_lines_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_npa_saa AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_sts_aggpings_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, vessel_profile.agg_geog FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_npa_sts AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\npa_sts_lines_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_npa_sts AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_wa_aggpings_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, vessel_profile.agg_geog FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_wa AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_wa_lines_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_wa AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_ea_aggpings_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, vessel_profile.agg_geog FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_ea AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_ea_lines_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_ea AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_sea_aggpings_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, vessel_profile.agg_geog FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_sea AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+pgsql2shp -f "C:\Users\pkerins\Documents\ArcGIS\postgres_output\region_sea_lines_120.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog_line shipview_alpha "SELECT vessel.mmsi, vessel.vessel_name, ST_LineFromMultiPoint(agg_geog::geometry) AS agg_geog_line FROM vessel_profile LEFT OUTER JOIN vessel ON vessel.mmsi=vessel_profile.mmsi AND vessel.vessel_name=vessel_profile.vessel_name WHERE in_region_sea AND vessel.vessel_type_code BETWEEN 70 AND 89 AND vessel.length >= 120"
+
+NEXT BATCH
+
+TEST
+
+pgsql2shp -f "C:\custom\pg_exports\hra_ea_old_B_Default.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT * FROM pgsql2shp_select('B','in_hra_ea_old',120,70,89);"
+pgsql2shp -f "C:\custom\pg_exports\hra_ea_new_B_Default.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT * FROM pgsql2shp_select('B','in_hra_ea_new',120,70,89);"
+pgsql2shp -f "C:\custom\pg_exports\hra_ea_oldNOTnew_B_Default.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT * FROM pgsql2shp_select('B','NOT in_hra_ea_new AND in_hra_ea_old',120,70,89);"
+
+MILITARY
+
+SAMPLE
+pgsql2shp -f "C:\custom\pg_exports\military_B.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT v.mmsi, v.vessel_name, v.callsign, v.length, v.flag_country, vp.ping_count, vp.agg_geog FROM vessel v INNER JOIN vessel_profile vp ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) WHERE v.vessel_type='Military' ORDER BY flag_country;"
+FULL
+pgsql2shp -f "C:\custom\pg_exports\military_ALL.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT sub.mmsi, sub.vessel_name, v.flag_country, v.callsign, v.length, sub.agg_geog, sub.ping_count FROM ( SELECT t1.mmsi, t1.vessel_name, count(*) AS ping_count, ST_Collect(t1.position::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog, ST_Collect(t1.position_ts::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog_ts FROM ping AS t1 WHERE t1.vessel_type ILIKE 'Military' GROUP BY t1.mmsi, t1.vessel_name) AS sub LEFT OUTER JOIN vessel v ON (v.mmsi=sub.mmsi AND v.vessel_name=sub.vessel_name) ORDER BY v.flag_country;"
+
+NEW APPROACH
+pgsql2shp -f "C:\custom\pg_exports\military_etc_aggregated.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code IN (35, 51, 55)) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name);"
+
+ATALANTA ZONES
+pgsql2shp -f "C:\custom\pg_exports\atalanta_ships_B.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, vp.ping_count, vp.agg_geog, vp.in_atalanta_red AS in_red, vp.in_atalanta_goa AS in_goa, vp.in_atalanta_somali AS in_somali, vp.in_atalanta_south AS in_south, vp.in_atalanta_north AS in_north, vp.in_atalanta_indian AS in_indian FROM vessel_profile_b vp LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) WHERE v.length >= 120 AND v.vessel_type_code BETWEEN 70 AND 89 AND vp.ping_count > 1 AND (vp.in_atalanta_red OR vp.in_atalanta_goa OR vp.in_atalanta_somali OR in_atalanta_south OR in_atalanta_north OR vp.in_atalanta_indian);"
+
+SOMALI EEZ
+pgsql2shp -f "C:\custom\pg_exports\somali_eez_i.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.mmsi, vp.vessel_name, vp.ping_count, v.length, v.vessel_type, v.flag_country, vp.agg_geog FROM vessel_profile_i vp LEFT OUTER JOIN vessel v ON (v.mmsi = vp.mmsi AND v.vessel_name = vp.vessel_name) LEFT OUTER JOIN zone z ON (z.name = 'eez_somalia') WHERE ST_Intersects(z.geog, vp.agg_geog) ORDER BY v.flag_country ASC, v.vessel_type ASC;"
+
+C&T 75-150
+pgsql2shp -f "C:\custom\pg_exports\somali_eez_i.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code BETWEEN 70 AND 89 AND length BETWEEN 75 AND 150) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name) ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name;"
+
+
+ALL VESSELS, SAMPLE B
+pgsql2shp -f "C:\custom\pg_exports\agg_all_b.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT grouped.mmsi, grouped.vessel_name AS name, v.vessel_type AS type, v.vessel_type_code AS code, v.length, v.flag_country AS flag, grouped.agg_geog FROM (SELECT mmsi, vessel_name, ST_Collect(inside.position::geometry ORDER BY ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT mmsi, vessel_name, position, ts_pos_utc FROM ping_b ) AS inside GROUP BY mmsi, vessel_name) AS grouped LEFT OUTER JOIN vessel v ON (v.mmsi=grouped.mmsi AND v.vessel_name=grouped.vessel_name) ORDER BY flag, type, mmsi, name;"
+
+ALL VESSELS, ALL YEAR
+pgsql2shp -f "C:\custom\pg_exports\agg_all_2015.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT grouped.mmsi, grouped.vessel_name AS name, v.vessel_type AS type, v.vessel_type_code AS code, v.length, v.flag_country AS flag, grouped.agg_geog FROM (SELECT mmsi, vessel_name, ST_Collect(inside.position::geometry ORDER BY ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT mmsi, vessel_name, position, ts_pos_utc FROM ping ) AS inside GROUP BY mmsi, vessel_name) AS grouped LEFT OUTER JOIN vessel v ON (v.mmsi=grouped.mmsi AND v.vessel_name=grouped.vessel_name) ORDER BY flag, type, mmsi, name;"
+
+
+C&T 120+ in atalanta_somali in sample B
+pgsql2shp -f "C:\custom\pg_exports\atalanta_somali_c&t120+.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.mmsi, vp.vessel_name, vp.ping_count, v.vessel_type, v.length, vp.agg_geog FROM vessel_profile_b vp LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) LEFT OUTER JOIN zone z ON z.name='atalanta_somali' WHERE v.vessel_type_code BETWEEN 70 AND 89 AND v.length >= 120 AND ST_Intersects(vp.agg_geog, z.geog) ORDER BY v.vessel_type, v.length;"
+
+
+C&T 120+ in atalanta_somali AND box_cape in sample B, cape pings only
+pgsql2shp -f "C:\custom\pg_exports\somali&cape_c&t120+_cape.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT p.mmsi, p.vessel_name, p.vessel_type, p.vessel_type_code, p.flag_country, p.sog, p.position FROM (SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, ST_GeomFromText('POLYGON((15 -30, 30 -30, 30 -40, 15 -40, 15 -30))')) INTERSECT SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p LEFT OUTER JOIN zone z ON z.name='atalanta_somali' WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, z.geog)) AS voi INNER JOIN ping_b p ON (p.mmsi=voi.mmsi AND p.vessel_name=voi.vessel_name) WHERE ST_Intersects(p.position, ST_GeomFromText('POLYGON((15 -30, 30 -30, 30 -40, 15 -40, 15 -30))')) ORDER BY p.mmsi, p.vessel_name, p.ts_pos_utc;"
+C&T 120+ in atalanta_somali AND box_cape in sample B, somali pings only
+pgsql2shp -f "C:\custom\pg_exports\somali&cape_c&t120+_cape.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT p.mmsi, p.vessel_name, p.vessel_type, p.vessel_type_code, p.flag_country, p.sog, p.position FROM (SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, ST_GeomFromText('POLYGON((15 -30, 30 -30, 30 -40, 15 -40, 15 -30))')) INTERSECT SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p LEFT OUTER JOIN zone z ON z.name='atalanta_somali' WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, z.geog)) AS voi INNER JOIN ping_b p ON (p.mmsi=voi.mmsi AND p.vessel_name=voi.vessel_name) WHERE ST_Intersects(p.position, ST_GeomFromText('POLYGON((15 -30, 30 -30, 30 -40, 15 -40, 15 -30))')) ORDER BY p.mmsi, p.vessel_name, p.ts_pos_utc;"
+C&T 120+ in atalanta_somali AND atalanta_north in sample B
+pgsql2shp -f "C:\custom\pg_exports\somali&cape_c&t120+.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT p.mmsi, p.vessel_name, p.vessel_type, p.vessel_type_code, p.flag_country, p.sog, p.position FROM (SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p LEFT OUTER JOIN zone z ON z.name='atalanta_north' WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, z.geog) INTERSECT SELECT DISTINCT ON (p.mmsi, p.vessel_name) p.mmsi, p.vessel_name FROM ping_b p LEFT OUTER JOIN zone z ON z.name='atalanta_somali' WHERE p.vessel_type_code BETWEEN 70 AND 89 AND p.length >= 120 AND ST_Intersects(p.position, z.geog)) AS voi INNER JOIN ping_b p ON (p.mmsi=voi.mmsi AND p.vessel_name=voi.vessel_name) ORDER BY p.flag_country, p.mmsi, p.vessel_name, p.ts_pos_utc;"
+
+MAXIMUS TRACK
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_maximus.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT * FROM ping WHERE mmsi=357132000 OR imo=9387164 ORDER BY ts_pos_utc;"
+
+"OMS RESOLUTION" TRACK
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_oms_resolution.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT * FROM ping WHERE vessel_name ILIKE 'oms resolution%' ORDER BY ts_pos_utc;"
+
+"VIVRE-G" TRACK
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_vivre-g.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT * FROM ping WHERE vessel_name ILIKE '%VIVRE%' ORDER BY ts_pos_utc;"

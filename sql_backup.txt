@@ -1,0 +1,3 @@
+COPY ping_legacy TO 'C:\custom\pg_backup\ping_legacy.csv' (FORMAT CSV, HEADER);
+COPY ping_raw TO 'C:\custom\pg_backup\ping_raw.csv' (FORMAT CSV, HEADER);
+COPY ping TO 'C:\custom\pg_backup\ping.csv' (FORMAT CSV, HEADER);

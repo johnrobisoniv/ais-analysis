@@ -1,0 +1,424 @@
+CREATE SCHEMA arcgis AUTHORIZATION arcgis;
+CREATE EXTENSION postgis WITH SCHEMA arcgis;
+
+CREATE TABLE ping_legacy (
+	fid		TEXT	PRIMARY KEY,
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		REAL,
+	position	TEXT	NOT NULL,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		REAL	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	nav_status_code	SMALLINT	NOT NULL,
+	source		CHAR(5)	NOT NULL,
+	ts_pos_utc	TEXT	NOT NULL,
+	ts_static_utc	TEXT,
+	ts_insert_utc	TEXT	NOT NULL
+);
+
+CREATE TABLE ping_raw (
+	fid		TEXT	PRIMARY KEY,
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		REAL,
+	position	TEXT	NOT NULL,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		REAL	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	nav_status_code	SMALLINT	NOT NULL,
+	source		CHAR(5)	NOT NULL,
+	ts_pos_utc	TEXT	NOT NULL,
+	ts_static_utc	TEXT,
+	ts_insert_utc	TEXT	NOT NULL,
+	dt_pos_utc	TEXT	NOT NULL,
+	dt_static_utc	TEXT,
+	dt_insert_utc	TEXT	NOT NULL,
+	vessel_type_main	TEXT,
+	vessel_type_sub	TEXT	
+);
+
+CREATE TABLE ping (
+	partition_code	TEXT	NOT NULL,
+	custom_id	SERIAL	PRIMARY KEY,
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		REAL,
+	position	GEOGRAPHY	NOT NULL,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	position_ts	GEOGRAPHY	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		REAL	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	nav_status_code	SMALLINT	NOT NULL,
+	source		CHAR(5)	NOT NULL,
+	ts_pos_utc	TIMESTAMPTZ	NOT NULL,
+	ts_static_utc	TIMESTAMPTZ,
+	ts_insert_utc	TIMESTAMPTZ	NOT NULL
+);
+
+CREATE TABLE ping_A (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-01-01 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-09-25 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_B (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-09-25 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-10-13 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_C (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-10-13 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-10-22 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_D (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-10-22 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-11-12 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_E (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-11-12 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-11-26 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_F (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-11-26 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-12-02 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_G (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-12-02 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-12-09 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_H (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-12-09 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2015-12-20 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_I (
+	CHECK ( ts_pos_utc >= TIMESTAMPTZ '2015-12-20 00:00:00 -0:00' AND
+		ts_pos_utc <  TIMESTAMPTZ '2016-01-01 00:00:00 -0:00')
+) INHERITS (ping);
+
+CREATE TABLE ping_X (
+	
+) INHERITS (ping);
+
+
+CREATE INDEX ping_A_ts ON ping_A (ts_pos_utc);
+CREATE INDEX ping_B_ts ON ping_B (ts_pos_utc);
+CREATE INDEX ping_C_ts ON ping_C (ts_pos_utc);
+CREATE INDEX ping_D_ts ON ping_D (ts_pos_utc);
+CREATE INDEX ping_E_ts ON ping_E (ts_pos_utc);
+CREATE INDEX ping_F_ts ON ping_F (ts_pos_utc);
+CREATE INDEX ping_G_ts ON ping_G (ts_pos_utc);
+CREATE INDEX ping_H_ts ON ping_H (ts_pos_utc);
+CREATE INDEX ping_I_ts ON ping_I (ts_pos_utc);
+CREATE INDEX ping_X_ts ON ping_X (ts_pos_utc);
+
+CREATE OR REPLACE FUNCTION raise_notice_ping_timestamp(mmsi INTEGER, vessel_name TEXT, ts_pos_utc TIMESTAMPTZ)
+RETURNS void AS $$
+BEGIN
+	RAISE NOTICE 'Bad ping--timestamp outside of expected range: % % %', $1, $2, $3;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION ping_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-01-01 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-09-25 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'A';
+		INSERT INTO ping_A VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-09-25 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-10-13 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'B';
+		INSERT INTO ping_B VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-10-13 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-10-22 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'C';
+		INSERT INTO ping_C VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-10-22 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-11-12 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'D';
+		INSERT INTO ping_D VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-11-12 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-11-26 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'E';
+		INSERT INTO ping_E VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-11-26 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-02 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'F';
+		INSERT INTO ping_F VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-02 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-09 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'G';
+		INSERT INTO ping_G VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-09 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-20 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'H';
+		INSERT INTO ping_H VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-19 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2016-01-01 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'I';
+		INSERT INTO ping_I VALUES (NEW.*);
+	ELSE	NEW.partition_code = 'X';
+		INSERT INTO ping_x VALUES (NEW.*);
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER insert_ping_trigger
+	BEFORE INSERT ON ping
+	FOR EACH ROW EXECUTE PROCEDURE ping_insert_trigger();
+
+
+
+
+
+CREATE TABLE vessel (
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	draught		REAL,
+	PRIMARY KEY(mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile (
+	partition_code	TEXT NOT NULL,
+	mmsi		INTEGER NOT NULL,
+	vessel_name	TEXT NOT NULL,
+	ping_count	INTEGER NOT NULL DEFAULT -1,
+	agg_geog	GEOGRAPHY NOT NULL,
+	agg_geog_ts	GEOGRAPHY NOT NULL,
+	centroid	GEOGRAPHY NOT NULL,
+	hull		GEOGRAPHY NOT NULL,
+	in_region_wa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_region_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_region_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_new	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_woa_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_xrz_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_east	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_west	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_naa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_nga_la	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa_mez	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_1_storage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_2_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_3_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_4_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_waiting	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_berthing	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_anchorage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	range		REAL NOT NULL DEFAULT -1,
+	PRIMARY KEY (mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile_A (
+	CHECK ( partition_code = 'A')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_B (
+	CHECK ( partition_code = 'B')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_C (
+	CHECK ( partition_code = 'C')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_D (
+	CHECK ( partition_code = 'D')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_E (
+	CHECK ( partition_code = 'E')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_F (
+	CHECK ( partition_code = 'F')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_G (
+	CHECK ( partition_code = 'G')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_H (
+	CHECK ( partition_code = 'H')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_I (
+	CHECK ( partition_code = 'I')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_X (
+	CHECK ( partition_code = 'X')
+) INHERITS (vessel_profile);
+
+
+CREATE INDEX vessel_profile_A_code ON vessel_profile_A (partition_code);
+CREATE INDEX vessel_profile_B_code ON vessel_profile_B (partition_code);
+CREATE INDEX vessel_profile_C_code ON vessel_profile_C (partition_code);
+CREATE INDEX vessel_profile_D_code ON vessel_profile_D (partition_code);
+CREATE INDEX vessel_profile_E_code ON vessel_profile_E (partition_code);
+CREATE INDEX vessel_profile_F_code ON vessel_profile_F (partition_code);
+CREATE INDEX vessel_profile_G_code ON vessel_profile_G (partition_code);
+CREATE INDEX vessel_profile_H_code ON vessel_profile_H (partition_code);
+CREATE INDEX vessel_profile_I_code ON vessel_profile_I (partition_code);
+CREATE INDEX vessel_profile_X_code ON vessel_profile_X (partition_code);
+
+
+CREATE OR REPLACE FUNCTION vessel_profile_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF	(NEW.partition_code = 'A')
+	THEN	INSERT INTO vessel_profile_A VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'B')
+	THEN	INSERT INTO vessel_profile_B VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'C')
+	THEN	INSERT INTO vessel_profile_C VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'D')
+	THEN	INSERT INTO vessel_profile_D VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'E')
+	THEN	INSERT INTO vessel_profile_E VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'F')
+	THEN	INSERT INTO vessel_profile_F VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'G')
+	THEN	INSERT INTO vessel_profile_G VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'H')
+	THEN	INSERT INTO vessel_profile_H VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'I')
+	THEN	INSERT INTO vessel_profile_I VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'X')
+	THEN	INSERT INTO vessel_profile_X VALUES (NEW.*);
+	ELSE	RAISE EXCEPTION 'vessel_profile entry has unrecognized partition_code';
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER insert_vessel_profile_trigger
+	BEFORE INSERT ON vessel_profile
+	FOR EACH ROW EXECUTE PROCEDURE vessel_profile_insert_trigger();
+
+
+
+
+CREATE TABLE zone (
+	objectid	NUMERIC(10,0)	PRIMARY KEY,
+	name		TEXT		NOT NULL,
+	geog		GEOGRAPHY	NOT NULL
+);
+
+
+
+
+CREATE OR REPLACE FUNCTION import_csv(fileabsolutepath text)
+	RETURNS void AS
+$func$
+
+DECLARE
+	path ALIAS FOR $1;
+
+BEGIN
+
+SET SESSION timezone = 'UTC'; 
+
+BEGIN
+EXECUTE format('COPY ping_raw FROM %1$L (FORMAT CSV, HEADER);', $1);
+EXCEPTION
+WHEN bad_copy_file_format THEN
+RAISE NOTICE 'Trying legacy import';
+EXECUTE format('COPY ping_legacy FROM %1$L (FORMAT CSV, HEADER);', $1);
+WHEN unique_violation THEN
+RAISE NOTICE 'File has already been imported';
+END;
+
+SET SESSION timezone = 'MST';
+END;
+
+$func$ LANGUAGE plpgsql
+
+
+
+
+
+
+

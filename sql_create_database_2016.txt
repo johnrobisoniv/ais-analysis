@@ -1,0 +1,309 @@
+--create database for 2016 pings
+--similar structure, but omitting samples, and possibly profiles, for now
+--as much as possible, going to copy sql statements from pgadmin table/function previews
+
+--create database manually
+--create user arcgis manually
+
+--need PostGIS types for practically everything
+CREATE SCHEMA arcgis AUTHORIZATION arcgis;
+CREATE EXTENSION postgis WITH SCHEMA arcgis;
+
+--start with historical/direct/raw ping tables
+CREATE TABLE ping_raw (
+	fid		TEXT	PRIMARY KEY,
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		REAL,
+	position	TEXT	NOT NULL,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		REAL	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	nav_status_code	SMALLINT	NOT NULL,
+	source		CHAR(5)	NOT NULL,
+	ts_pos_utc	TEXT	NOT NULL,
+	ts_static_utc	TEXT,
+	ts_insert_utc	TEXT	NOT NULL,
+	dt_pos_utc	TEXT	NOT NULL,
+	dt_static_utc	TEXT,
+	dt_insert_utc	TEXT	NOT NULL,
+	vessel_type_main	TEXT,
+	vessel_type_sub	TEXT	
+);
+
+
+CREATE TABLE ping (
+	partition_code	TEXT	NOT NULL,
+	custom_id	SERIAL	PRIMARY KEY,
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		REAL,
+	position	GEOGRAPHY	NOT NULL,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	position_ts	GEOGRAPHY	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		REAL	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	nav_status_code	SMALLINT	NOT NULL,
+	source		CHAR(5)	NOT NULL,
+	ts_pos_utc	TIMESTAMPTZ	NOT NULL,
+	ts_static_utc	TIMESTAMPTZ,
+	ts_insert_utc	TIMESTAMPTZ	NOT NULL
+);
+
+--will skip the checks
+--okay now adding partitioning
+CREATE TABLE ping_jan (
+	CHECK ( extract('month' FROM ts_pos_utc) = 1 )
+) INHERITS (ping);
+CREATE TABLE ping_feb (
+	CHECK ( extract('month' FROM ts_pos_utc) = 2 )
+) INHERITS (ping);
+CREATE TABLE ping_mar (
+	CHECK ( extract('month' FROM ts_pos_utc) = 3 )
+) INHERITS (ping);
+CREATE TABLE ping_apr (
+	CHECK ( extract('month' FROM ts_pos_utc) = 4 )
+) INHERITS (ping);
+CREATE TABLE ping_may (
+	CHECK ( extract('month' FROM ts_pos_utc) = 5 )
+) INHERITS (ping);
+CREATE TABLE ping_jun (
+	CHECK ( extract('month' FROM ts_pos_utc) = 6 )
+) INHERITS (ping);
+CREATE TABLE ping_jul (
+	CHECK ( extract('month' FROM ts_pos_utc) = 7 )
+) INHERITS (ping);
+CREATE TABLE ping_aug (
+	CHECK ( extract('month' FROM ts_pos_utc) = 8 )
+) INHERITS (ping);
+CREATE TABLE ping_sep (
+	CHECK ( extract('month' FROM ts_pos_utc) = 9 )
+) INHERITS (ping);
+CREATE TABLE ping_oct (
+	CHECK ( extract('month' FROM ts_pos_utc) = 10 )
+) INHERITS (ping);
+CREATE TABLE ping_nov (
+	CHECK ( extract('month' FROM ts_pos_utc) = 11 )
+) INHERITS (ping);
+CREATE TABLE ping_dec (
+	CHECK ( extract('month' FROM ts_pos_utc) = 12 )
+) INHERITS (ping);
+CREATE TABLE ping_xxx (
+	
+) INHERITS (ping);
+
+--adding this index mostly as a guidepost and reminder
+
+CREATE INDEX ping_ts ON ping (ts_pos_utc);
+CREATE INDEX ping_jan_ts ON ping_jan (ts_pos_utc);
+CREATE INDEX ping_feb_ts ON ping_feb (ts_pos_utc);
+CREATE INDEX ping_mar_ts ON ping_mar (ts_pos_utc);
+CREATE INDEX ping_apr_ts ON ping_apr (ts_pos_utc);
+CREATE INDEX ping_may_ts ON ping_may (ts_pos_utc);
+CREATE INDEX ping_jun_ts ON ping_jun (ts_pos_utc);
+CREATE INDEX ping_jul_ts ON ping_jul (ts_pos_utc);
+CREATE INDEX ping_aug_ts ON ping_aug (ts_pos_utc);
+CREATE INDEX ping_sep_ts ON ping_sep (ts_pos_utc);
+CREATE INDEX ping_oct_ts ON ping_oct (ts_pos_utc);
+CREATE INDEX ping_nov_ts ON ping_nov (ts_pos_utc);
+CREATE INDEX ping_dec_ts ON ping_dec (ts_pos_utc);
+CREATE INDEX ping_xxx_ts ON ping_xxx (ts_pos_utc);
+
+--no triggers, no inserts
+--again, now there are
+CREATE OR REPLACE FUNCTION ping_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF	extract('MONTH' FROM NEW.ts_pos_utc) = 1
+	THEN	NEW.partition_code = 'jan';
+		INSERT INTO ping_jan VALUES (NEW.*);
+	ELSEIF	
+	
+		(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-01-01 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-09-25 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'A';
+		INSERT INTO ping_A VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-09-25 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-10-13 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'B';
+		INSERT INTO ping_B VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-10-13 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-10-22 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'C';
+		INSERT INTO ping_C VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-10-22 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-11-12 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'D';
+		INSERT INTO ping_D VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-11-12 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-11-26 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'E';
+		INSERT INTO ping_E VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-11-26 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-02 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'F';
+		INSERT INTO ping_F VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-02 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-09 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'G';
+		INSERT INTO ping_G VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-09 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2015-12-20 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'H';
+		INSERT INTO ping_H VALUES (NEW.*);
+	ELSEIF	(NEW.ts_pos_utc >= TIMESTAMPTZ '2015-12-19 00:00:00 -0:00' AND
+		NEW.ts_pos_utc <  TIMESTAMPTZ '2016-01-01 00:00:00 -0:00')
+	THEN	NEW.partition_code = 'I';
+		INSERT INTO ping_I VALUES (NEW.*);
+	ELSE	NEW.partition_code = 'X';
+		INSERT INTO ping_x VALUES (NEW.*);
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;	
+
+
+CREATE TABLE vessel (
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	draught		REAL,
+	PRIMARY KEY(mmsi, vessel_name)
+);
+
+--not sure if profile is premature, and if profile fields are sufficiently up to date
+--really just a shortcut though so might as well go in, although may want to use months instead
+--build it as a reminder, but can use monthly aggregations until figure out specifics
+
+CREATE TABLE vessel_profile (
+	sample		TEXT NOT NULL,
+	mmsi		INTEGER NOT NULL,
+	vessel_name	TEXT NOT NULL,
+	ping_count	INTEGER NOT NULL DEFAULT -1,
+	agg_geog	GEOGRAPHY NOT NULL,
+	agg_geog_ts	GEOGRAPHY NOT NULL,
+	centroid	GEOGRAPHY NOT NULL,
+	hull		GEOGRAPHY NOT NULL,
+	in_region_wa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_region_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_region_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_new	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_woa_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_xrz_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_east	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_west	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_naa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_nga_la	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa_mez	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_1_storage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_2_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_3_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_4_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_waiting	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_berthing	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_anchorage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	range		REAL NOT NULL DEFAULT -1,
+	PRIMARY KEY (mmsi, vessel_name)
+);
+
+
+
+
+CREATE TABLE zone (
+	objectid	NUMERIC(10,0)	PRIMARY KEY,
+	name		TEXT		NOT NULL,
+	geog		GEOGRAPHY	NOT NULL
+);
+
+CREATE TABLE vessel_pings_monthly (
+	month		TEXT NOT NULL,
+	mmsi		INTEGER NOT NULL,
+	vessel_name	TEXT NOT NULL,
+	ping_count	INTEGER NOT NULL DEFAULT -1,
+	agg_geog	GEOGRAPHY NOT NULL,
+	
+	PRIMARY KEY (month, mmsi, vessel_name)
+);
+
+
+CREATE OR REPLACE FUNCTION import_csv(fileabsolutepath text)
+	RETURNS void AS
+$func$
+
+DECLARE
+	path ALIAS FOR $1;
+
+BEGIN
+
+SET SESSION timezone = 'UTC'; 
+
+BEGIN
+EXECUTE format('COPY ping_raw FROM %1$L (FORMAT CSV, HEADER);', $1);
+EXCEPTION
+WHEN bad_copy_file_format THEN
+RAISE NOTICE 'Trying legacy import';
+EXECUTE format('COPY ping_legacy FROM %1$L (FORMAT CSV, HEADER);', $1);
+WHEN unique_violation THEN
+RAISE NOTICE 'File has already been imported';
+END;
+
+SET SESSION timezone = 'MST';
+END;
+
+$func$ LANGUAGE plpgsql
+
+

@@ -1,0 +1,80 @@
+CREATE OR REPLACE FUNCTION calc_decimal_degrees(existing TEXT, degrees TEXT, minutes TEXT, minutes_dec TEXT, cardinal TEXT)
+RETURNS FLOAT AS $$
+DECLARE
+	exi FLOAT;
+	deg FLOAT;
+	min FLOAT;
+	min_dec FLOAT;
+	answer FLOAT;
+BEGIN
+	IF existing IS NOT NULL AND existing != '' THEN
+		BEGIN
+			exi = existing::FLOAT;
+			IF abs(exi) > 180 THEN
+				RAISE NOTICE 'Illegal existing value for decimal degrees, which will be ignored';
+			END IF;
+			RETURN exi;
+		EXCEPTION WHEN invalid_text_representation THEN
+			RAISE NOTICE 'Cannot parse existing decimal degrees value';
+		END; 	
+	END IF;			
+
+	BEGIN 
+		IF degrees IS NOT NULL THEN
+			deg = degrees::FLOAT;
+		ELSE
+			RAISE NOTICE 'Degrees value is NULL, cannot proceed';
+			RETURN NULL;
+		END IF; 
+	EXCEPTION WHEN invalid_text_representation THEN
+		RAISE EXCEPTION 'Cannot parse degrees as numeric value: %', $1;
+	END;
+
+	BEGIN
+		IF minutes IS NOT NULL THEN
+			min = minutes::FLOAT;
+		ELSE
+			RAISE NOTICE 'Minutes value is NULL, using minimum value of 0 instead';
+			min = 0;
+		END IF; 
+	EXCEPTION WHEN invalid_text_representation THEN
+		RAISE NOTICE 'Cannot parse minutes as numeric value: %', $2;
+		min = 0.0;
+	END;
+
+	BEGIN
+		IF minutes_dec IS NOT NULL THEN
+			min_dec = minutes_dec::FLOAT;
+		ELSE
+			RAISE NOTICE 'Minutes_Dec value is NULL, using minimum value of 0 instead';
+			min_dec = 0;
+		END IF; 
+	EXCEPTION WHEN invalid_text_representation THEN
+		RAISE NOTICE 'Cannot parse minutes decimal as numeric value: %', $3;
+		min_dec = 0.0;
+	END;
+
+	IF cardinal NOT IN ('N', 'n', 'S', 's', 'E', 'e', 'W', 'w') THEN
+		RAISE EXCEPTION 'Cannot parse cardinal indicator (not N/n/S/s/E/e/W/w): %', $4;
+	END IF;
+
+	IF cardinal IN ('N', 'n', 'S', 's') AND abs(deg) > 90 THEN
+		RAISE EXCEPTION 'Illegal value for latitudinal degrees: %', $1;
+	ELSEIF cardinal IN ('E', 'e', 'W', 'w') AND abs(deg) > 180 THEN 
+		RAISE EXCEPTION 'Illegal value for longitudinal degrees: %', $1;
+	END IF;
+	
+	IF abs(min) > 59 THEN
+		RAISE NOTICE 'Illegal minutes value (will use allowable maximum 59 instead): %', $2;
+		min = 59;
+	END IF;
+
+	answer = (deg::TEXT || '.' || right(((min::TEXT || '.' || min_dec::TEXT)::FLOAT / 60)::TEXT, length(((min::TEXT || '.' || min_dec::TEXT)::FLOAT / 60)::TEXT) - 2))::FLOAT ;
+	IF cardinal IN ('S', 's', 'W', 'w') THEN
+		answer = answer * -1;
+	END IF;
+	
+	RETURN answer;
+
+END;
+$$ LANGUAGE plpgsql;

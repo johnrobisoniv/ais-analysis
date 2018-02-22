@@ -1,0 +1,165 @@
+MILITARY, LAW ENFORCEMENT, S&R
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code IN (35, 51, 55)
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+;
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code IN (35, 51, 55)) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name);
+
+-----------------------
+
+C&T 75-150
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code BETWEEN 70 AND 89
+			AND length BETWEEN 75 AND 150
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name
+;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_agg_c&t_75-150.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code BETWEEN 70 AND 89 AND length BETWEEN 75 AND 150) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name) ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name;"
+
+-----------------------
+
+C&T 75-425
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code BETWEEN 70 AND 89
+			AND length BETWEEN 75 AND 425
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name
+;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_c&t_75-425.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code BETWEEN 70 AND 89 AND length BETWEEN 75 AND 425) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name) ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name;"
+
+-----------------------
+
+TUG 35+
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code = 52
+			AND length >= 35
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name
+;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_tug_35+.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code = 52 AND length >= 35) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name) ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name;"
+
+-----------------------
+
+TUG 35+
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code BETWEEN 31 AND 32
+			AND length >= 35
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name
+;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_tow_35+.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (SELECT outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code BETWEEN 31 AND 32 AND length >= 35) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name) ORDER BY vessel.flag_country, vessel.vessel_type, bigsub.mmsi, bigsub.name;"

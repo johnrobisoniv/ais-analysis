@@ -1,0 +1,8 @@
+DELETE
+FROM ping USING ping pong 
+WHERE (
+	ping.mmsi = pong.mmsi AND 
+	ping.vessel_name = pong.vessel_name AND
+	ping.ts_pos_utc = pong.ts_pos_utc AND 
+	ping.custom_id > pong.custom_id
+);

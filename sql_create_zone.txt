@@ -1,0 +1,46 @@
+-- Table: zone
+
+-- DROP TABLE zone;
+
+CREATE TABLE zone
+(
+  gid serial NOT NULL,
+  objectid numeric(10,0),
+  name character varying(60),
+  shape_leng numeric,
+  shape_area numeric,
+  geog geography(MultiPolygon,4326),
+  CONSTRAINT zone_pkey PRIMARY KEY (gid)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE zone
+  OWNER TO arcgis;
+
+-- Index: zone_geog_idx
+
+-- DROP INDEX zone_geog_idx;
+
+CREATE INDEX zone_geog_idx
+  ON zone
+  USING gist
+  (geog);
+
+-- Index: zone_geog_idx1
+
+-- DROP INDEX zone_geog_idx1;
+
+CREATE INDEX zone_geog_idx1
+  ON zone
+  USING gist
+  (geog);
+
+-- Index: zone_geog_idx2
+
+-- DROP INDEX zone_geog_idx2;
+
+CREATE INDEX zone_geog_idx2
+  ON zone
+  USING gist
+  (geog);

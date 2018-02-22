@@ -1,0 +1,244 @@
+ALTER TABLE vessel_profile
+	ADD COLUMN in_hra_ea_old_nowedge BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_aoi_sea BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_jcc_wa BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_jcc_ea BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_jcc_sea BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_strait_malacca BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_strait_singapore BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_strait_sunda BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_bgd_vicinity BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE vessel_profile
+	ALTER COLUMN in_hra_ea_old_nowedge DROP NOT NULL,
+	ALTER COLUMN in_hra_ea_old_nowedge DROP NOT NULL,
+	ALTER COLUMN in_aoi_sea DROP NOT NULL,
+	ALTER COLUMN in_jcc_wa DROP NOT NULL,
+	ALTER COLUMN in_jcc_ea DROP NOT NULL,
+	ALTER COLUMN in_jcc_sea DROP NOT NULL,
+	ALTER COLUMN in_strait_malacca DROP NOT NULL,
+	ALTER COLUMN in_strait_singapore DROP NOT NULL,
+	ALTER COLUMN in_strait_sunda DROP NOT NULL,
+	ALTER COLUMN in_bgd_vicinity DROP NOT NULL;
+	
+
+UPDATE vessel_profile
+SET (	in_hra_ea_old_nowedge, in_aoi_sea,
+	in_jcc_wa, in_jcc_ea, in_jcc_sea,
+	in_strait_malacca, in_strait_singapore, in_strait_sunda,
+	in_bgd_vicinity )=
+	(
+	ST_Intersects(sub.agg_geog, sub.geog_hra_ea_old_nowedge),
+	ST_Intersects(sub.agg_geog, sub.geog_aoi_sea),
+	ST_Intersects(sub.agg_geog, sub.geog_jcc_wa),
+	ST_Intersects(sub.agg_geog, sub.geog_jcc_ea),
+	ST_Intersects(sub.agg_geog, sub.geog_jcc_sea),
+	ST_Intersects(sub.agg_geog, sub.geog_strait_malacca),
+	ST_Intersects(sub.agg_geog, sub.geog_strait_singapore),
+	ST_Intersects(sub.agg_geog, sub.geog_strait_sunda),
+	ST_Intersects(sub.agg_geog, sub.geog_bgd_vicinity)
+	)
+FROM (	
+	SELECT vp.mmsi, vp.vessel_name, vp.agg_geog, 
+		z_hra_ea_old_nowedge.geog AS geog_hra_ea_old_nowedge,
+		z_aoi_sea.geog AS geog_aoi_sea,
+		z_jcc_wa.geog AS geog_jcc_wa,
+		z_jcc_ea.geog AS geog_jcc_ea,
+		z_jcc_sea.geog AS geog_jcc_sea,
+		z_strait_malacca.geog AS geog_strait_malacca,
+		z_strait_singapore.geog AS geog_strait_singapore,
+		z_strait_sunda.geog AS geog_strait_sunda,
+		z_bgd_vicinity.geog AS geog_bgd_vicinity
+		
+	FROM vessel_profile vp
+	LEFT OUTER JOIN zone z_hra_ea_old_nowedge
+	ON z_hra_ea_old_nowedge.name = 'hra_ea_old_nowedge'
+	LEFT OUTER JOIN zone z_aoi_sea
+	ON z_aoi_sea.name = 'aoi_sea'
+	LEFT OUTER JOIN zone z_jcc_wa
+	ON z_jcc_wa.name = 'jcc_wa'
+	LEFT OUTER JOIN zone z_jcc_ea
+	ON z_jcc_ea.name = 'jcc_ea'
+	LEFT OUTER JOIN zone z_jcc_sea
+	ON z_jcc_sea.name = 'jcc_sea'
+	LEFT OUTER JOIN zone z_strait_malacca
+	ON z_strait_malacca.name = 'strait_malacca'
+	LEFT OUTER JOIN zone z_strait_singapore
+	ON z_strait_singapore.name = 'strait_singapore'
+	LEFT OUTER JOIN zone z_strait_sunda
+	ON z_strait_sunda.name = 'strait_sunda'
+	LEFT OUTER JOIN zone z_bgd_vicinity
+	ON z_bgd_vicinity.name = 'bgd_vicinity'
+	) AS sub
+WHERE vessel_profile.partition_code=sub.partition_code 
+AND vessel_profile.mmsi=sub.mmsi 
+AND vessel_profile.vessel_name=sub.vessel_name
+;
+
+
+
+ALTER TABLE vessel_profile
+	ADD COLUMN cont_region_wa	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_region_ea	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_region_sea	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_vra_wa		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_vra_ea		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_vra_sea		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_wra_wa		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_wra_ea		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_wra_sea		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_hra_ea_old	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_hra_ea_old_nowedge	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_hra_ea_new	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_ibf_woa_ea	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_ibf_xrz_ea	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_ibf_hra_wa	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_ibf_hra_ea	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_aoi_sea		BOOLEAN DEFAULT FALSE,
+	ADD COLUMN cont_bgd_vicinity	BOOLEAN DEFAULT FALSE;
+
+UPDATE vessel_profile
+SET (	cont_region_wa, cont_region_ea, cont_region_sea,
+	cont_vra_wa, cont_vra_ea, cont_vra_sea,
+	cont_wra_wa, cont_wra_ea, cont_wra_sea,
+	cont_hra_ea_old, cont_hra_ea_old_nowedge, cont_hra_ea_new,
+	cont_ibf_woa_ea, cont_ibf_xrz_ea, cont_ibf_hra_wa, cont_ibf_hra_ea,
+	cont_aoi_sea,
+	cont_bgd_vicinity	)=
+	(
+	ST_Covers(sub.geog_region_wa, sub.agg_geog),
+	ST_Covers(sub.geog_region_ea, sub.agg_geog),
+	ST_Covers(sub.geog_region_sea, sub.agg_geog),
+	ST_Covers(sub.geog_vra_wa, sub.agg_geog),
+	ST_Covers(sub.geog_vra_ea, sub.agg_geog),
+	ST_Covers(sub.geog_vra_sea, sub.agg_geog),
+	ST_Covers(sub.geog_wra_wa, sub.agg_geog),
+	ST_Covers(sub.geog_wra_ea, sub.agg_geog),
+	ST_Covers(sub.geog_wra_sea, sub.agg_geog),
+	ST_Covers(sub.geog_hra_ea_old, sub.agg_geog),
+	ST_Covers(sub.geog_hra_ea_old_nowedge, sub.agg_geog),
+	ST_Covers(sub.geog_hra_ea_new, sub.agg_geog),
+	ST_Covers(sub.geog_ibf_woa_ea, sub.agg_geog),
+	ST_Covers(sub.geog_ibf_xrz_ea, sub.agg_geog),
+	ST_Covers(sub.geog_ibf_hra_wa, sub.agg_geog),
+	ST_Covers(sub.geog_ibf_hra_ea, sub.agg_geog),
+	ST_Covers(sub.geog_aoi_sea, sub.agg_geog),
+	ST_Covers(sub.geog_bgd_vicinity, sub.agg_geog)
+	)
+FROM (	
+	SELECT	vp.partition_code, vp.mmsi, vp.vessel_name, vp.agg_geog, 
+		z_region_wa.geog AS geog_region_wa, 
+		z_region_ea.geog AS geog_region_ea, 
+		z_region_sea.geog AS geog_region_sea, 
+		z_vra_wa.geog AS geog_vra_wa,
+		z_vra_ea.geog AS geog_vra_ea,
+		z_vra_sea.geog AS geog_vra_sea,
+		z_wra_wa.geog AS geog_wra_wa,
+		z_wra_ea.geog AS geog_wra_ea,
+		z_wra_sea.geog AS geog_wra_sea,
+		z_hra_ea_old.geog AS geog_hra_ea_old,
+		z_hra_ea_old_nowedge.geog AS geog_hra_ea_old_nowedge,
+		z_hra_ea_new.geog AS geog_hra_ea_new,
+		z_ibf_woa_ea.geog AS geog_ibf_woa_ea,
+		z_ibf_xrz_ea.geog AS geog_ibf_xrz_ea,
+		z_ibf_hra_wa.geog AS geog_ibf_hra_wa,
+		z_ibf_hra_ea.geog AS geog_ibf_hra_ea,
+		z_aoi_sea.geog AS geog_aoi_sea,
+		z_bgd_vicinity.geog AS geog_bgd_vicinity
+		
+	FROM vessel_profile vp
+	LEFT OUTER JOIN zone z_region_wa
+	ON z_region_wa.name = 'region_wa'
+	LEFT OUTER JOIN zone z_region_ea
+	ON z_region_ea.name = 'region_ea'
+	LEFT OUTER JOIN zone z_region_sea
+	ON z_region_sea.name = 'region_sea'
+	LEFT OUTER JOIN zone z_vra_wa
+	ON z_vra_wa.name = 'vra_wa'
+	LEFT OUTER JOIN zone z_vra_ea
+	ON z_vra_ea.name = 'vra_ea'
+	LEFT OUTER JOIN zone z_vra_sea
+	ON z_vra_sea.name = 'vra_sea'	
+	LEFT OUTER JOIN zone z_wra_wa
+	ON z_wra_wa.name = 'wra_wa'
+	LEFT OUTER JOIN zone z_wra_ea
+	ON z_wra_ea.name = 'wra_ea'
+	LEFT OUTER JOIN zone z_wra_sea
+	ON z_wra_sea.name = 'wra_sea'	
+	LEFT OUTER JOIN zone z_hra_ea_old
+	ON z_hra_ea_old.name = 'hra_ea_old'
+	LEFT OUTER JOIN zone z_hra_ea_old_nowedge
+	ON z_hra_ea_old_nowedge.name = 'hra_ea_old_nowedge'
+	LEFT OUTER JOIN zone z_hra_ea_new
+	ON z_hra_ea_new.name = 'hra_ea_new'	
+	LEFT OUTER JOIN zone z_ibf_woa_ea
+	ON z_ibf_woa_ea.name = 'ibf_woa_ea'
+	LEFT OUTER JOIN zone z_ibf_xrz_ea
+	ON z_ibf_xrz_ea.name = 'ibf_xrz_ea'
+	LEFT OUTER JOIN zone z_ibf_hra_wa
+	ON z_ibf_hra_wa.name = 'ibf_hra_wa'
+	LEFT OUTER JOIN zone z_ibf_hra_ea
+	ON z_ibf_hra_ea.name = 'ibf_hra_ea'	
+	LEFT OUTER JOIN zone z_aoi_sea
+	ON z_aoi_sea.name = 'aoi_sea'	
+	LEFT OUTER JOIN zone z_bgd_vicinity
+	ON z_bgd_vicinity.name = 'bgd_vicinity'
+	) AS sub
+WHERE vessel_profile.partition_code=sub.partition_code 
+AND vessel_profile.mmsi=sub.mmsi 
+AND vessel_profile.vessel_name=sub.vessel_name
+;
+
+
+
+
+
+
+
+ALTER TABLE vessel_profile
+	ADD COLUMN in_atalanta_red	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_atalanta_goa	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_atalanta_somali	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_atalanta_south	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_atalanta_north	BOOLEAN DEFAULT FALSE,
+	ADD COLUMN in_atalanta_indian	BOOLEAN DEFAULT FALSE;
+
+UPDATE vessel_profile
+SET (	in_atalanta_red, in_atalanta_goa, in_atalanta_somali,
+	in_atalanta_south, in_atalanta_north, in_atalanta_indian	
+	)=
+	(
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_red),
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_goa),
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_somali),
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_south),
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_north),
+	ST_Intersects(sub.agg_geog, sub.geog_atalanta_indian)
+	)
+FROM (	
+	SELECT	vp.partition_code, vp.mmsi, vp.vessel_name, vp.agg_geog, 
+		z_atalanta_red.geog AS geog_atalanta_red,
+		z_atalanta_goa.geog AS geog_atalanta_goa,
+		z_atalanta_somali.geog AS geog_atalanta_somali,
+		z_atalanta_south.geog AS geog_atalanta_south,
+		z_atalanta_north.geog AS geog_atalanta_north,
+		z_atalanta_indian.geog AS geog_atalanta_indian
+		
+	FROM vessel_profile vp
+	LEFT OUTER JOIN zone z_atalanta_red
+	ON z_atalanta_red.name = 'atalanta_red'
+	LEFT OUTER JOIN zone z_atalanta_goa
+	ON z_atalanta_goa.name = 'atalanta_goa'
+	LEFT OUTER JOIN zone z_atalanta_somali
+	ON z_atalanta_somali.name = 'atalanta_somali'
+	LEFT OUTER JOIN zone z_atalanta_south
+	ON z_atalanta_south.name = 'atalanta_south'
+	LEFT OUTER JOIN zone z_atalanta_north
+	ON z_atalanta_north.name = 'atalanta_north'
+	LEFT OUTER JOIN zone z_atalanta_indian
+	ON z_atalanta_indian.name = 'atalanta_indian'	
+	) AS sub
+WHERE vessel_profile.partition_code=sub.partition_code 
+AND vessel_profile.mmsi=sub.mmsi 
+AND vessel_profile.vessel_name=sub.vessel_name
+;

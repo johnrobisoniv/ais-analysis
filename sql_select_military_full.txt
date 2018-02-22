@@ -1,0 +1,60 @@
+SELECT sub.mmsi, sub.vessel_name, v.flag_country, v.callsign, v.length, sub.agg_geog, sub.ping_count FROM (
+	SELECT 	t1.mmsi, t1.vessel_name,
+		count(*) AS ping_count, 
+		ST_Collect(t1.position::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog,
+		ST_Collect(t1.position_ts::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog_ts
+	FROM ping AS t1
+	WHERE t1.vessel_type ILIKE 'Military'
+	GROUP BY t1.mmsi, t1.vessel_name
+	) AS sub
+LEFT OUTER JOIN vessel v ON (v.mmsi=sub.mmsi AND v.vessel_name=sub.vessel_name)
+ORDER BY v.flag_country;
+
+
+
+SELECT sub.mmsi, sub.vessel_name, v.flag_country, v.callsign, v.length, sub.agg_geog, sub.ping_count FROM ( SELECT t1.mmsi, t1.vessel_name, count(*) AS ping_count, ST_Collect(t1.position::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog, ST_Collect(t1.position_ts::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog_ts FROM ping AS t1 WHERE t1.vessel_type ILIKE 'Military' GROUP BY t1.mmsi, t1.vessel_name) AS sub LEFT OUTER JOIN vessel v ON (v.mmsi=sub.mmsi AND v.vessel_name=sub.vessel_name) ORDER BY v.flag_country;
+
+
+
+SELECT sub.*, ping.vessel_type AS ping_type, ping.latitude, ping.longitude
+FROM	(
+	SELECT	DISTINCT ON (mmsi, vessel_name)
+		mmsi, vessel_name AS name, vessel_type, 
+		vessel_type_code AS type_code, length, flag_country AS flag
+	FROM	ping
+	WHERE	vessel_type_code IN (35, 51, 55)
+	) AS sub
+INNER JOIN ping
+	ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+ORDER BY
+	sub.flag, sub.vessel_type, sub.mmsi, sub.name
+;
+
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type
+FROM
+	(
+	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count,
+		ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog
+	FROM	(
+		SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id
+		FROM	(
+			SELECT	DISTINCT ON (mmsi, vessel_name)
+				mmsi, vessel_name AS name, vessel_type, 
+				vessel_type_code AS type_code, length, flag_country AS flag
+			FROM	ping
+			WHERE	vessel_type_code IN (35, 51, 55)
+			) AS sub
+		INNER JOIN ping
+			ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name)
+		ORDER BY
+			sub.flag, sub.vessel_type, sub.mmsi, sub.name
+		) AS outsub
+	GROUP BY
+		outsub.mmsi, outsub.name
+	) AS bigsub
+LEFT OUTER JOIN vessel
+	ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name)
+;
+
+SELECT bigsub.*, vessel.flag_country, vessel.vessel_type FROM (	SELECT	outsub.mmsi, outsub.name, count(outsub.*) AS ping_count, ST_Collect(outsub.position::geometry ORDER BY outsub.ts_pos_utc ASC)::geography AS agg_geog FROM (SELECT sub.*, ping.vessel_type AS ping_type, ping.position, ping.ts_pos_utc, ping.custom_id FROM (SELECT DISTINCT ON (mmsi, vessel_name) mmsi, vessel_name AS name, vessel_type, vessel_type_code AS type_code, length, flag_country AS flag FROM ping WHERE vessel_type_code IN (35, 51, 55)) AS sub INNER JOIN ping ON (ping.mmsi=sub.mmsi AND ping.vessel_name=sub.name) ORDER BY sub.flag, sub.vessel_type, sub.mmsi, sub.name) AS outsub GROUP BY outsub.mmsi, outsub.name) AS bigsub LEFT OUTER JOIN vessel ON (vessel.mmsi = bigsub.mmsi AND vessel.vessel_name = bigsub.name);

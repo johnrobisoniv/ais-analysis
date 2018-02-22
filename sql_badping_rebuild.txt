@@ -1,0 +1,346 @@
+CREATE TABLE vessel (
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	draught		REAL,
+	PRIMARY KEY(mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile (
+	partition_code	TEXT NOT NULL,
+	mmsi		INTEGER NOT NULL,
+	vessel_name	TEXT NOT NULL,
+	ping_count	INTEGER NOT NULL DEFAULT -1,
+	agg_geog	GEOGRAPHY NOT NULL,
+	agg_geog_ts	GEOGRAPHY NOT NULL,
+	centroid	GEOGRAPHY NOT NULL,
+	hull		GEOGRAPHY NOT NULL,
+	in_region_wa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_region_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_region_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old_nowedge	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_new	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_woa_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_xrz_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_aoi_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_east	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_west	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_malacca	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_singapore	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_sunda	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_bgd_vicinity	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_naa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_nga_la	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa_mez	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_1_storage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_2_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_3_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_4_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_waiting	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_berthing	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_anchorage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	range		REAL NOT NULL DEFAULT -1,
+	PRIMARY KEY (mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile_A (
+	CHECK ( partition_code = 'A')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_B (
+	CHECK ( partition_code = 'B')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_C (
+	CHECK ( partition_code = 'C')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_D (
+	CHECK ( partition_code = 'D')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_E (
+	CHECK ( partition_code = 'E')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_F (
+	CHECK ( partition_code = 'F')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_G (
+	CHECK ( partition_code = 'G')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_H (
+	CHECK ( partition_code = 'H')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_I (
+	CHECK ( partition_code = 'I')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_X (
+	CHECK ( partition_code = 'X')
+) INHERITS (vessel_profile);
+
+
+CREATE INDEX vessel_profile_A_code ON vessel_profile_A (partition_code);
+CREATE INDEX vessel_profile_B_code ON vessel_profile_B (partition_code);
+CREATE INDEX vessel_profile_C_code ON vessel_profile_C (partition_code);
+CREATE INDEX vessel_profile_D_code ON vessel_profile_D (partition_code);
+CREATE INDEX vessel_profile_E_code ON vessel_profile_E (partition_code);
+CREATE INDEX vessel_profile_F_code ON vessel_profile_F (partition_code);
+CREATE INDEX vessel_profile_G_code ON vessel_profile_G (partition_code);
+CREATE INDEX vessel_profile_H_code ON vessel_profile_H (partition_code);
+CREATE INDEX vessel_profile_I_code ON vessel_profile_I (partition_code);
+CREATE INDEX vessel_profile_X_code ON vessel_profile_X (partition_code);
+
+CREATE OR REPLACE FUNCTION vessel_profile_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF	(NEW.partition_code = 'A')
+	THEN	INSERT INTO vessel_profile_A VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'B')
+	THEN	INSERT INTO vessel_profile_B VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'C')
+	THEN	INSERT INTO vessel_profile_C VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'D')
+	THEN	INSERT INTO vessel_profile_D VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'E')
+	THEN	INSERT INTO vessel_profile_E VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'F')
+	THEN	INSERT INTO vessel_profile_F VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'G')
+	THEN	INSERT INTO vessel_profile_G VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'H')
+	THEN	INSERT INTO vessel_profile_H VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'I')
+	THEN	INSERT INTO vessel_profile_I VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'X')
+	THEN	INSERT INTO vessel_profile_X VALUES (NEW.*);
+	ELSE	RAISE EXCEPTION 'vessel_profile entry has unrecognized partition_code';
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER insert_vessel_profile_trigger
+	BEFORE INSERT ON vessel_profile
+	FOR EACH ROW EXECUTE PROCEDURE vessel_profile_insert_trigger();
+
+
+
+
+
+DELETE FROM ping
+WHERE
+length > 458		OR
+@ longitude > 180	OR
+@ latitude > 90		OR
+sog < 0			OR
+sog > 35 		OR
+cog < 0 		OR
+cog > 360		OR
+heading < 0 		OR
+heading > 360
+;
+
+
+
+
+
+
+INSERT INTO vessel (
+	mmsi, imo, vessel_name, callsign, vessel_type, vessel_type_code, vessel_type_cargo,
+	vessel_class, length, width, flag_country, flag_code, draught
+	)
+SELECT	t1.mmsi, t1.imo, t1.vessel_name, t1.callsign, t1.vessel_type, t1.vessel_type_code, t1.vessel_type_cargo,
+	t1.vessel_class, t1.length, t1.width, t1.flag_country, t1.flag_code, t1.draught
+FROM ping AS t1
+LEFT OUTER JOIN ping AS t2
+	ON t1.mmsi = t2.mmsi AND t1.vessel_name = t2.vessel_name AND t1.custom_id < t2.custom_id
+WHERE t2.mmsi IS NULL
+ORDER BY t1.custom_id
+;
+
+
+
+
+INSERT INTO vessel_profile (
+	partition_code, mmsi, vessel_name, ping_count, agg_geog, agg_geog_ts,
+	centroid, hull,
+	in_region_wa, in_region_ea, in_region_sea,
+	in_vra_wa, in_vra_ea, in_vra_sea,
+	in_wra_wa, in_wra_ea, in_wra_sea,
+	in_hra_ea_old, in_hra_ea_old_nowedge, in_hra_ea_new,
+	in_ibf_woa_ea, in_ibf_xrz_ea, in_ibf_hra_wa, in_ibf_hra_ea,
+	in_aoi_sea,
+	in_jcc_wa, in_jcc_ea, in_jcc_sea,
+	in_irtc_east, in_irtc_west,
+	in_strait_malacca, in_strait_singapore, in_strait_sunda,
+	in_bgd_vicinity,
+	in_nga_naa, in_nga_la, in_nga_sts, in_nga_saa, in_nga_saa_mez,
+	in_ben_1_storage, in_ben_2_tanker, in_ben_3_tanker, in_ben_4_sts,
+	in_tgo_waiting, in_tgo_berthing,
+	in_gha_anchorage, in_gha_sts,
+	range
+	)
+SELECT 	sub.*, 
+	ST_Centroid(sub.agg_geog::geometry) AS centroid,
+	ST_ConvexHull(sub.agg_geog::geometry) AS hull, 
+	ST_Intersects(sub.agg_geog, z_region_wa.geog) AS in_region_wa,
+	ST_Intersects(sub.agg_geog, z_region_ea.geog) AS in_region_ea,
+	ST_Intersects(sub.agg_geog, z_region_sea.geog) AS in_region_sea,
+	ST_Intersects(sub.agg_geog, z_vra_wa.geog) AS in_vra_wa,
+	ST_Intersects(sub.agg_geog, z_vra_ea.geog) AS in_vra_ea,
+	ST_Intersects(sub.agg_geog, z_vra_sea.geog) AS in_vra_sea,
+	ST_Intersects(sub.agg_geog, z_wra_wa.geog) AS in_wra_wa,
+	ST_Intersects(sub.agg_geog, z_wra_ea.geog) AS in_wra_ea,
+	ST_Intersects(sub.agg_geog, z_wra_sea.geog) AS in_wra_sea,
+	ST_Intersects(sub.agg_geog, z_hra_ea_old.geog) AS in_hra_ea_old,
+	ST_Intersects(sub.agg_geog, z_hra_ea_old_nowedge.geog) AS in_hra_ea_old_nowedge,
+	ST_Intersects(sub.agg_geog, z_hra_ea_new.geog) AS in_hra_ea_new,
+	ST_Intersects(sub.agg_geog, z_ibf_woa_ea.geog) AS in_ibf_woa_ea,
+	ST_Intersects(sub.agg_geog, z_ibf_xrz_ea.geog) AS in_ibf_xrz_ea,
+	ST_Intersects(sub.agg_geog, z_ibf_hra_wa.geog) AS in_ibf_hra_wa,
+	ST_Intersects(sub.agg_geog, z_ibf_hra_ea.geog) AS in_ibf_hra_ea,
+	ST_Intersects(sub.agg_geog, z_aoi_sea.geog) AS in_aoi_sea,
+	ST_Intersects(sub.agg_geog, z_jcc_wa.geog) AS in_jcc_wa,
+	ST_Intersects(sub.agg_geog, z_jcc_ea.geog) AS in_jcc_ea,
+	ST_Intersects(sub.agg_geog, z_jcc_sea.geog) AS in_jcc_sea,
+	ST_Intersects(sub.agg_geog, z_irtc_east.geog) AS in_irtc_east,
+	ST_Intersects(sub.agg_geog, z_irtc_west.geog) AS in_irtc_west,
+	ST_Intersects(sub.agg_geog, z_strait_malacca.geog) AS in_strait_malacca,
+	ST_Intersects(sub.agg_geog, z_strait_singapore.geog) AS in_strait_singapore,
+	ST_Intersects(sub.agg_geog, z_strait_sunda.geog) AS in_strait_sunda,
+	ST_Intersects(sub.agg_geog, z_bgd_vicinity.geog) AS in_bgd_vicinity,
+	ST_Intersects(sub.agg_geog, z_nga_naa.geog) AS in_nga_naa,
+	ST_Intersects(sub.agg_geog, z_nga_la.geog) AS in_nga_la,
+	ST_Intersects(sub.agg_geog, z_nga_sts.geog) AS in_nga_sts,
+	ST_Intersects(sub.agg_geog, z_nga_saa.geog) AS in_nga_saa,
+	ST_Intersects(sub.agg_geog, z_nga_saa_mez.geog) AS in_nga_saa_mez,
+	ST_Intersects(sub.agg_geog, z_ben_1_storage.geog) AS in_ben_1_storage,
+	ST_Intersects(sub.agg_geog, z_ben_2_tanker.geog) AS in_ben_2_tanker,
+	ST_Intersects(sub.agg_geog, z_ben_3_tanker.geog) AS in_ben_3_tanker,
+	ST_Intersects(sub.agg_geog, z_ben_4_sts.geog) AS in_ben_4_sts,
+	ST_Intersects(sub.agg_geog, z_tgo_waiting.geog) AS in_tgo_waiting,
+	ST_Intersects(sub.agg_geog, z_tgo_berthing.geog) AS in_tgo_berthing,
+	ST_Intersects(sub.agg_geog, z_gha_anchorage.geog) AS in_gha_anchorage,
+	ST_Intersects(sub.agg_geog, z_gha_sts.geog) AS in_gha_sts,
+	ST_MaxDistance(sub.agg_geog::geometry, sub.agg_geog::geometry) AS range
+FROM 
+(
+	SELECT 	t1.partition_code, t1.mmsi, t1.vessel_name,
+		count(*) AS ping_count, 
+		ST_Collect(t1.position::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog,
+		ST_Collect(t1.position_ts::geometry ORDER BY t1.ts_pos_utc ASC)::geography AS agg_geog_ts
+	FROM ping AS t1
+	GROUP BY t1.partition_code, t1.mmsi, t1.vessel_name
+) AS sub
+LEFT OUTER JOIN zone z_region_wa
+ON z_region_wa.name='region_wa'
+LEFT OUTER JOIN zone z_region_ea
+ON z_region_ea.name='region_ea'
+LEFT OUTER JOIN zone z_region_sea
+ON z_region_sea.name='region_sea'
+LEFT OUTER JOIN zone z_vra_wa
+ON z_vra_wa.name='vra_wa'
+LEFT OUTER JOIN zone z_vra_ea
+ON z_vra_ea.name='vra_ea'
+LEFT OUTER JOIN zone z_vra_sea
+ON z_vra_sea.name='vra_sea'
+LEFT OUTER JOIN zone z_wra_wa
+ON z_wra_wa.name='wra_wa'
+LEFT OUTER JOIN zone z_wra_ea
+ON z_wra_ea.name='wra_ea'
+LEFT OUTER JOIN zone z_wra_sea
+ON z_wra_sea.name='wra_sea'
+LEFT OUTER JOIN zone z_hra_ea_old
+ON z_hra_ea_old.name='hra_ea_old'
+LEFT OUTER JOIN zone z_hra_ea_old_nowedge
+ON z_hra_ea_old_nowedge.name='hra_ea_old_nowedge'
+LEFT OUTER JOIN zone z_hra_ea_new
+ON z_hra_ea_new.name='hra_ea_new'
+LEFT OUTER JOIN zone z_ibf_woa_ea
+ON z_ibf_woa_ea.name='ibf_woa_ea'
+LEFT OUTER JOIN zone z_ibf_xrz_ea
+ON z_ibf_xrz_ea.name='ibf_xrz_ea'
+LEFT OUTER JOIN zone z_ibf_hra_wa
+ON z_ibf_hra_wa.name='ibf_hra_wa'
+LEFT OUTER JOIN zone z_ibf_hra_ea
+ON z_ibf_hra_ea.name='ibf_hra_ea'
+LEFT OUTER JOIN zone z_aoi_sea
+ON z_aoi_sea.name='aoi_sea'
+LEFT OUTER JOIN zone z_jcc_wa
+ON z_jcc_wa.name='jcc_wa'
+LEFT OUTER JOIN zone z_jcc_ea
+ON z_jcc_ea.name='jcc_ea'
+LEFT OUTER JOIN zone z_jcc_sea
+ON z_jcc_sea.name='jcc_sea'
+LEFT OUTER JOIN zone z_irtc_east
+ON z_irtc_east.name='irtc_east'
+LEFT OUTER JOIN zone z_irtc_west
+ON z_irtc_west.name='irtc_west'
+LEFT OUTER JOIN zone z_strait_malacca
+ON z_strait_malacca.name='strait_malacca'
+LEFT OUTER JOIN zone z_strait_singapore
+ON z_strait_singapore.name='strait_singapore'
+LEFT OUTER JOIN zone z_strait_sunda
+ON z_strait_sunda.name='strait_sunda'
+LEFT OUTER JOIN zone z_bgd_vicinity
+ON z_bgd_vicinity.name='bgd_vicinity'
+LEFT OUTER JOIN zone z_nga_naa
+ON z_nga_naa.name='nga_naa'
+LEFT OUTER JOIN zone z_nga_la
+ON z_nga_la.name='nga_la'
+LEFT OUTER JOIN zone z_nga_sts
+ON z_nga_sts.name='nga_sts'
+LEFT OUTER JOIN zone z_nga_saa
+ON z_nga_saa.name='nga_saa'
+LEFT OUTER JOIN zone z_nga_saa_mez
+ON z_nga_saa_mez.name='nga_saa_mez'
+LEFT OUTER JOIN zone z_ben_1_storage
+ON z_ben_1_storage.name='ben_1_storage'
+LEFT OUTER JOIN zone z_ben_2_tanker
+ON z_ben_2_tanker.name='ben_2_tanker'
+LEFT OUTER JOIN zone z_ben_3_tanker
+ON z_ben_3_tanker.name='ben_3_tanker'
+LEFT OUTER JOIN zone z_ben_4_sts
+ON z_ben_4_sts.name='ben_4_sts'
+LEFT OUTER JOIN zone z_tgo_waiting
+ON z_tgo_waiting.name='tgo_waiting'
+LEFT OUTER JOIN zone z_tgo_berthing
+ON z_tgo_berthing.name='tgo_berthing'
+LEFT OUTER JOIN zone z_gha_anchorage
+ON z_gha_anchorage.name='gha_anchorage'
+LEFT OUTER JOIN zone z_gha_sts
+ON z_gha_sts.name='gha_sts'
+;
+
+

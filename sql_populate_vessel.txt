@@ -1,0 +1,12 @@
+INSERT INTO vessel (
+	mmsi, imo, vessel_name, callsign, vessel_type, vessel_type_code, vessel_type_cargo,
+	vessel_class, length, width, flag_country, flag_code, draught
+	)
+SELECT	t1.mmsi, t1.imo, t1.vessel_name, t1.callsign, t1.vessel_type, t1.vessel_type_code, t1.vessel_type_cargo,
+	t1.vessel_class, t1.length, t1.width, t1.flag_country, t1.flag_code, t1.draught
+FROM ping AS t1
+LEFT OUTER JOIN ping AS t2
+	ON t1.mmsi = t2.mmsi AND t1.vessel_name = t2.vessel_name AND t1.custom_id < t2.custom_id
+WHERE t2.mmsi IS NULL
+ORDER BY t1.custom_id
+;

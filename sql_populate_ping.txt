@@ -1,0 +1,39 @@
+SET SESSION timezone = 'UTC';
+INSERT INTO ping (
+	partition_code, mmsi, imo, vessel_name, callsign, vessel_type, vessel_type_code, vessel_type_cargo, vessel_class, length,
+	width, flag_country, flag_code, destination, eta, draught, position, longitude, latitude, position_ts, sog, cog, rot,
+	heading, nav_status, nav_status_code, source, ts_pos_utc, ts_static_utc, ts_insert_utc)
+SELECT  '', mmsi, imo, regexp_replace(vessel_name, '\s+$', ''), callsign, vessel_type, vessel_type_code, vessel_type_cargo, vessel_class, length,
+	width, flag_country, flag_code, destination, 
+	NULL AS eta,
+	draught,
+	ST_SetSRID(ST_MakePoint((regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision, (regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision), 4326) AS position, 
+	(regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision AS longitude, 
+	(regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision AS latitude,
+	ST_SetSRID(ST_MakePointM((regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision, (regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision, extract(epoch FROM to_timestamp(ts_pos_utc, 'YYYYMMDDHH24MISS'))), 4326) AS position_ts, 
+	sog, cog, rot, heading, nav_status, nav_status_code, source, 
+	 to_timestamp(ts_pos_utc, 'YYYYMMDDHH24MISS'), 
+	 to_timestamp(ts_static_utc, 'YYYYMMDDHH24MISS'),
+	 to_timestamp(ts_insert_utc, 'YYYYMMDDHH24MISS')
+FROM ping_raw;
+
+
+INSERT INTO ping (
+	partition_code, mmsi, imo, vessel_name, callsign, vessel_type, vessel_type_code, vessel_type_cargo, vessel_class, length,
+	width, flag_country, flag_code, destination, eta, draught, position, longitude, latitude, position_ts, sog, cog, rot,
+	heading, nav_status, nav_status_code, source, ts_pos_utc, ts_static_utc, ts_insert_utc)
+SELECT  '', mmsi, imo, regexp_replace(vessel_name, '\s+$', ''), callsign, vessel_type, vessel_type_code, vessel_type_cargo, vessel_class, length,
+	width, flag_country, flag_code, destination, 
+	NULL AS eta,
+	draught,
+	ST_SetSRID(ST_MakePoint((regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision, (regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision), 4326) AS position, 
+	(regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision AS longitude, 
+	(regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision AS latitude,
+	ST_SetSRID(ST_MakePointM((regexp_split_to_array(position, E'\\s|\\(|\\)'))[4]::double precision, (regexp_split_to_array(position, E'\\s|\\(|\\)'))[3]::double precision, extract(epoch FROM to_timestamp(ts_pos_utc, 'YYYYMMDDHH24MISS'))), 4326) AS position_ts, 
+	sog, cog, rot, heading, nav_status, nav_status_code, source, 
+	 to_timestamp(ts_pos_utc, 'YYYYMMDDHH24MISS'), 
+	 to_timestamp(ts_static_utc, 'YYYYMMDDHH24MISS'),
+	 to_timestamp(ts_insert_utc, 'YYYYMMDDHH24MISS')
+FROM ping_legacy;
+
+SET SESSION timezone = 'MST';

@@ -1,0 +1,185 @@
+CREATE TABLE vessel (
+	mmsi		INTEGER	NOT NULL,
+	imo		INTEGER,
+	vessel_name	TEXT	NOT NULL,
+	callsign	TEXT,
+	vessel_type	TEXT	NOT NULL,
+	vessel_type_code	SMALLINT	NOT NULL,
+	vessel_type_cargo	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT,
+	width		SMALLINT,
+	flag_country	TEXT	NOT NULL,
+	flag_code	SMALLINT	NOT NULL,
+	draught		REAL,
+	PRIMARY KEY(mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile (
+	partition_code	TEXT NOT NULL,
+	mmsi		INTEGER NOT NULL,
+	vessel_name	TEXT NOT NULL,
+	ping_count	INTEGER NOT NULL DEFAULT -1,
+	agg_geog	GEOGRAPHY NOT NULL,
+	agg_geog_ts	GEOGRAPHY NOT NULL,
+	centroid	GEOGRAPHY NOT NULL,
+	hull		GEOGRAPHY NOT NULL,
+	in_region_wa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_region_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_region_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_vra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_wra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_old_nowedge	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_hra_ea_new	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_woa_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_xrz_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ibf_hra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_aoi_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_jcc_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_red		BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_goa		BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_somali	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_south	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_north	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_atalanta_indian	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_east	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_irtc_west	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_malacca	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_singapore	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_strait_sunda	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_bgd_vicinity	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_naa	BOOLEAN	NOT NULL DEFAULT FALSE,
+	in_nga_la	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_nga_saa_mez	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_1_storage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_2_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_3_tanker	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_ben_4_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_waiting	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_tgo_berthing	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_anchorage	BOOLEAN NOT NULL DEFAULT FALSE,
+	in_gha_sts	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_region_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_region_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_region_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_vra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_vra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_vra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_wra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_wra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_wra_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_hra_ea_old	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_hra_ea_old_nowedge	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_hra_ea_new	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_ibf_woa_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_ibf_xrz_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_ibf_hra_wa	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_ibf_hra_ea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_aoi_sea	BOOLEAN NOT NULL DEFAULT FALSE,
+	cont_bgd_vicinity	BOOLEAN NOT NULL DEFAULT FALSE,	
+	range		REAL NOT NULL DEFAULT -1,
+	PRIMARY KEY (mmsi, vessel_name)
+);
+
+CREATE TABLE vessel_profile_A (
+	CHECK ( partition_code = 'A')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_B (
+	CHECK ( partition_code = 'B')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_C (
+	CHECK ( partition_code = 'C')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_D (
+	CHECK ( partition_code = 'D')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_E (
+	CHECK ( partition_code = 'E')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_F (
+	CHECK ( partition_code = 'F')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_G (
+	CHECK ( partition_code = 'G')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_H (
+	CHECK ( partition_code = 'H')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_I (
+	CHECK ( partition_code = 'I')
+) INHERITS (vessel_profile);
+
+CREATE TABLE vessel_profile_X (
+	CHECK ( partition_code = 'X')
+) INHERITS (vessel_profile);
+
+
+CREATE INDEX vessel_profile_A_code ON vessel_profile_A (partition_code);
+CREATE INDEX vessel_profile_B_code ON vessel_profile_B (partition_code);
+CREATE INDEX vessel_profile_C_code ON vessel_profile_C (partition_code);
+CREATE INDEX vessel_profile_D_code ON vessel_profile_D (partition_code);
+CREATE INDEX vessel_profile_E_code ON vessel_profile_E (partition_code);
+CREATE INDEX vessel_profile_F_code ON vessel_profile_F (partition_code);
+CREATE INDEX vessel_profile_G_code ON vessel_profile_G (partition_code);
+CREATE INDEX vessel_profile_H_code ON vessel_profile_H (partition_code);
+CREATE INDEX vessel_profile_I_code ON vessel_profile_I (partition_code);
+CREATE INDEX vessel_profile_X_code ON vessel_profile_X (partition_code);
+
+CREATE OR REPLACE FUNCTION vessel_profile_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF	(NEW.partition_code = 'A')
+	THEN	INSERT INTO vessel_profile_A VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'B')
+	THEN	INSERT INTO vessel_profile_B VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'C')
+	THEN	INSERT INTO vessel_profile_C VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'D')
+	THEN	INSERT INTO vessel_profile_D VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'E')
+	THEN	INSERT INTO vessel_profile_E VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'F')
+	THEN	INSERT INTO vessel_profile_F VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'G')
+	THEN	INSERT INTO vessel_profile_G VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'H')
+	THEN	INSERT INTO vessel_profile_H VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'I')
+	THEN	INSERT INTO vessel_profile_I VALUES (NEW.*);
+	ELSEIF	(NEW.partition_code = 'X')
+	THEN	INSERT INTO vessel_profile_X VALUES (NEW.*);
+	ELSE	RAISE EXCEPTION 'vessel_profile entry has unrecognized partition_code';
+	END IF;
+	RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER insert_vessel_profile_trigger
+	BEFORE INSERT ON vessel_profile
+	FOR EACH ROW EXECUTE PROCEDURE vessel_profile_insert_trigger();
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+CREATE OR REPLACE FUNCTION create_position(latitude FLOAT, longitude FLOAT)
+RETURNS GEOGRAPHY AS
+$BODY$
+DECLARE
+	position GEOGRAPHY;
+BEGIN
+	IF latitude IS NULL OR abs(latitude) > 90 THEN
+		RAISE NOTICE 'Illegal latitude value: %', $1;
+		RETURN NULL;
+	ELSEIF longitude IS NULL OR abs(longitude) > 180 THEN
+		RAISE NOTICE 'Illegal longitude value: %', $2;
+		RETURN NULL;
+	END IF;
+	
+	position = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);
+	
+	RETURN position;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION create_position_ts(latitude FLOAT, longitude FLOAT, date_time TIMESTAMPTZ)
+RETURNS GEOGRAPHY AS
+$BODY$
+DECLARE
+	position_ts GEOGRAPHY;
+BEGIN
+	IF latitude IS NULL OR abs(latitude) > 90 THEN
+		RAISE NOTICE 'Illegal latitude value: %', $1;
+		RETURN NULL;
+	ELSEIF longitude IS NULL OR abs(longitude) > 180 THEN
+		RAISE NOTICE 'Illegal longitude value: %', $2;
+		RETURN NULL;
+	ELSEIF date_time IS NULL THEN
+		RAISE NOTICE 'Illegal date_time value: %', $3;
+		RETURN NULL;
+	END IF;
+	
+	position_ts = ST_SetSRID(ST_MakePointM(longitude, latitude, extract(epoch from date_time)), 4326);
+	
+	RETURN position_ts;
+END;
+$BODY$
+LANGUAGE plpgsql;

@@ -1,0 +1,14 @@
+SELECT *
+FROM vessel_profile_b vp
+LEFT OUTER JOIN zone z_red ON z_red.name='geog_red'
+LEFT OUTER JOIN zone z_goa ON z_goa.name='geog_goa'
+LEFT OUTER JOIN zone z_gnb ON z_gnb.name='geog_gulf&bay'
+LEFT OUTER JOIN zone z_reroute ON z_reroute.name='poly_reroute'
+LEFT OUTER JOIN zone z_alley ON z_alley.name='poly_alley'
+LEFT OUTER JOIN zone z_eior ON z_eior.name='box_eior'
+LEFT OUTER JOIN zone z_coast ON z_coast.name='geog_coast'
+
+WHERE	(ST_Intersects(vp.agg_geog, z_red.geog) OR ST_Intersects(vp.agg_geog, z_goa.geog))
+AND	ST_Intersects(vp.agg_geog, z_eior.geog)
+AND 	NOT ST_Intersects(vp.agg_geog, z_gnb.geog)
+;

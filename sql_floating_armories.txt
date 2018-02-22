@@ -1,0 +1,109 @@
+KNOWN ARMORIES (in our database)
+
+SELECT * FROM ping 
+WHERE vessel_name ILIKE '%MAHANUWARA%'
+OR vessel_name ILIKE 'SINBAD'
+OR vessel_name ILIKE 'M.T. AVANT GARDE'
+OR vessel_name ILIKE 'MV ALADIN'
+OR vessel_name ILIKE 'SULTAN'
+OR vessel_name ILIKE 'MNG RESOLUTION'
+OR vessel_name ILIKE 'RESOLUTION'
+OR vessel_name ILIKE 'SEA PATROL'
+OR vessel_name ILIKE 'MT SEA LION I%'
+OR vessel_name ILIKE 'M/T SEA LION I%'
+ORDER BY mmsi, vessel_name, ts_pos_utc
+;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_armories_known.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT * FROM ping WHERE vessel_name ILIKE '%MAHANUWARA%' OR vessel_name ILIKE 'SINBAD' OR vessel_name ILIKE 'M.T. AVANT GARDE' OR vessel_name ILIKE 'MV ALADIN' OR vessel_name ILIKE 'SULTAN' OR vessel_name ILIKE 'MNG RESOLUTION' OR vessel_name ILIKE 'RESOLUTION' OR vessel_name ILIKE 'SEA PATROL' OR vessel_name ILIKE 'MT SEA LION I%' OR vessel_name ILIKE 'M/T SEA LION I%' ORDER BY mmsi, vessel_name, ts_pos_utc;"
+
+CORRECTED (MOSTLY)
+
+SELECT * FROM ping 
+WHERE vessel_name ILIKE '%MAHANUWARA%'
+OR vessel_name ILIKE 'SINBAD'
+OR vessel_name ILIKE 'M.T. AVANT GARDE'
+OR vessel_name ILIKE 'MV ALADIN'
+OR vessel_name ILIKE 'SULTAN'
+OR vessel_name ILIKE 'MNG RESOLUTION'
+OR vessel_name ILIKE 'SEA PATROL'
+ORDER BY mmsi, vessel_name, ts_pos_utc
+
+-------------
+
+NOW ACTUALLY SEARCHING
+
+SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.ping_count, vp.range,
+	ST_Perimeter(vp.hull) AS perimeter
+FROM vessel_profile_b vp
+LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name)
+WHERE vp.ping_count > 4
+AND v.length <= 90
+AND v.width <= 25
+AND v.vessel_type_code NOT BETWEEN 20 AND 29
+AND v.vessel_type_code NOT IN (30, 36, 37, 50)
+AND v.vessel_type_code NOT BETWEEN 53 AND 59
+AND v.vessel_type_code NOT BETWEEN 60 AND 89
+AND v.flag_country NOT IN ('China', 'Panama', 'Marshall Islands', 'Liberia',
+	'Hong Kong', 'USA', 'Singapore', 'Spain', 'UK', 'Denmark', 'India',
+	'Taiwan', 'Japan', 'Malaysia', 'Indonesia')
+ORDER BY perimeter
+
+
+---------
+
+LET'S GRAB THE MNG 'FLEET'
+
+SELECT * FROM ping p WHERE p.vessel_name ILIKE '%mng %' ORDER BY mmsi, vessel_name, ts_pos_utc ASC;
+
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_mng.shp" -h localhost -p 5432 -u arcgis -P postgres -g position shipview_beta "SELECT * FROM ping p WHERE p.vessel_name ILIKE '%mng %' ORDER BY mmsi, vessel_name, ts_pos_utc ASC;"
+
+
+-----------------
+
+BACK TO SEARCH...here are vessels from 'expected' countries
+
+SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.ping_count, vp.range,
+	ST_Perimeter(vp.hull) AS perimeter
+FROM vessel_profile_b vp
+LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name)
+WHERE vp.ping_count > 4
+AND v.length <= 90
+AND v.width <= 25
+AND v.vessel_type_code NOT BETWEEN 20 AND 29
+AND v.vessel_type_code NOT IN (30, 36, 37, 50)
+AND v.vessel_type_code NOT BETWEEN 53 AND 59
+AND v.vessel_type_code NOT BETWEEN 60 AND 89
+AND v.flag_country IN ('Saint Kitts and Nevis', 'Saint Vincent and the Grenadines',
+	'Djibouti', 'Mongolia', 'Sri Lanka', 'United Arab Emirates', 'Nigeria', 'Niger')
+ORDER BY perimeter
+
+WA export
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_armory_suspects_WA.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.agg_geog, vp.ping_count, vp.range, ST_Perimeter(vp.hull) AS perimeter FROM vessel_profile_b vp LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) WHERE vp.ping_count > 4 AND v.length <= 90 AND v.width <= 25 AND v.vessel_type_code NOT BETWEEN 20 AND 29 AND v.vessel_type_code NOT IN (30, 36, 37, 50) AND v.vessel_type_code NOT BETWEEN 53 AND 59 AND v.vessel_type_code NOT BETWEEN 60 AND 89 AND v.flag_country IN ('Saint Kitts and Nevis', 'Saint Vincent and the Grenadines', 'Djibouti', 'Mongolia', 'Sri Lanka', 'United Arab Emirates', 'Nigeria', 'Niger') AND vp.in_region_wa ORDER BY perimeter;"
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_armory_suspects_EA.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.agg_geog, vp.ping_count, vp.range, ST_Perimeter(vp.hull) AS perimeter FROM vessel_profile_b vp LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) WHERE vp.ping_count > 4 AND v.length <= 90 AND v.width <= 25 AND v.vessel_type_code NOT BETWEEN 20 AND 29 AND v.vessel_type_code NOT IN (30, 36, 37, 50) AND v.vessel_type_code NOT BETWEEN 53 AND 59 AND v.vessel_type_code NOT BETWEEN 60 AND 89 AND v.flag_country IN ('Saint Kitts and Nevis', 'Saint Vincent and the Grenadines', 'Djibouti', 'Mongolia', 'Sri Lanka', 'United Arab Emirates', 'Nigeria', 'Niger') AND vp.in_region_ea ORDER BY perimeter;"
+pgsql2shp -f "C:\custom\pg_exports\2015_pings_armory_suspects_SEA.shp" -h localhost -p 5432 -u arcgis -P postgres -g agg_geog shipview_beta "SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.agg_geog, vp.ping_count, vp.range, ST_Perimeter(vp.hull) AS perimeter FROM vessel_profile_b vp LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name) WHERE vp.ping_count > 4 AND v.length <= 90 AND v.width <= 25 AND v.vessel_type_code NOT BETWEEN 20 AND 29 AND v.vessel_type_code NOT IN (30, 36, 37, 50) AND v.vessel_type_code NOT BETWEEN 53 AND 59 AND v.vessel_type_code NOT BETWEEN 60 AND 89 AND v.flag_country IN ('Saint Kitts and Nevis', 'Saint Vincent and the Grenadines', 'Djibouti', 'Mongolia', 'Sri Lanka', 'United Arab Emirates', 'Nigeria', 'Niger') AND vp.in_region_sea ORDER BY perimeter;"
+
+--------
+
+EXCLUSION APPROACH
+
+SELECT vp.partition_code, vp.mmsi, vp.vessel_name, v.vessel_type, v.vessel_type_code, v.flag_country, vp.ping_count, vp.range,
+	vp.in_region_wa, vp.in_region_ea, vp.in_region_sea,
+	ST_Perimeter(vp.hull) AS perimeter
+FROM vessel_profile_b vp
+LEFT OUTER JOIN vessel v ON (v.mmsi=vp.mmsi AND v.vessel_name=vp.vessel_name)
+WHERE vp.ping_count > 4
+AND v.length <= 90
+AND v.width <= 25
+AND v.vessel_type_code NOT BETWEEN 20 AND 29
+AND v.vessel_type_code NOT IN (30, 36, 37, 50)
+AND v.vessel_type_code NOT BETWEEN 53 AND 59
+AND v.vessel_type_code NOT BETWEEN 60 AND 89
+AND v.flag_country NOT IN ('China', 'Panama', 'Marshall Islands', 'Liberia',
+	'Hong Kong', 'USA', 'Singapore', 'Spain', 'UK', 'Denmark', 'India',
+	'Taiwan', 'Japan', 'Malaysia', 'Indonesia')
+ORDER BY perimeter
+
+----------
+
+INCLUSION APPROACH
+

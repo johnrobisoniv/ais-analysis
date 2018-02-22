@@ -1,0 +1,26 @@
+CREATE SCHEMA arcgis AUTHORIZATION arcgis;
+CREATE EXTENSION postgis WITH SCHEMA arcgis;
+
+CREATE TABLE ping_historical_raw (
+	mmsi		INTEGER,
+	imo		INTEGER,
+	vessel_name	TEXT,
+	callsign	TEXT,
+	vessel_type	TEXT,
+	vessel_class	CHAR(1)	NOT NULL,
+	length		SMALLINT NOT NULL,
+	width		SMALLINT NOT NULL,
+	flag_country	TEXT	NOT NULL,
+	destination	TEXT,
+	eta		TEXT,
+	draught		SMALLINT,
+	longitude	DOUBLE PRECISION	NOT NULL,
+	latitude	DOUBLE PRECISION	NOT NULL,
+	sog		REAL	NOT NULL,
+	cog		REAL	NOT NULL,
+	rot		REAL	NOT NULL,
+	heading		SMALLINT	NOT NULL,
+	nav_status	TEXT	NOT NULL,
+	ts_pos_utc	TEXT	NOT NULL,
+	ts_static_utc	TEXT	NOT NULL
+);
